@@ -2,8 +2,7 @@ import pandas as pd
 
 df = pd.read_csv('./2022_spring.csv')
 
-# We want only undergraduate courses in the CS and Econ departments
-df = df[(df['Mnemonic'] == 'CS') | (df['Mnemonic'] == 'ECON')]
+# We want only undergraduate courses
 df = df[df['Number'] < 4900]
 df.to_csv('dataset.csv', index=False)
 
@@ -31,7 +30,10 @@ for index, section in df.iterrows():
     section_type = section['Type']
     matching_indices = courses.index[
         (courses['Mnemonic'] == section['Mnemonic']) & (courses['Number'] == section['Number'])]
-    assert len(matching_indices) == 1
+    if len(matching_indices) != 1:
+        print(
+            f'WARNING: {section["Mnemonic"]} {section["Number"]} is being skipped (creditless class?)')
+        continue
     sections.append([section_type, matching_indices[0]])
 
     if section['Days1'] != 'TBA':
@@ -41,7 +43,7 @@ for index, section in df.iterrows():
 
         section_times.append([section_index, time])
         for i in range(int(len(days) / 2)):
-            section_days.append([section_index, days[2*i:2*i+2]])
+            section_days.append([section_index, days[2 * i:2 * i + 2]])
 
     instructors = section['Instructor1']
     for name in instructors.split(','):
